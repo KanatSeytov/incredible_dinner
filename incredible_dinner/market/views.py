@@ -12,16 +12,17 @@ class SearchAPIView(APIView):
     def get(self, request):
         query = request.query_params.get('query')
         if not query:
-            return Response({
-                "error": "no data found"
-            })
+            distributors = Distributor.objects.all()
+            products = Product.objects.all()
+        else:
 
-        distributors = Distributor.objects.filter(
-            Q(name__icontains=query) | Q(description__icontains=query)
-        )
-        products = Product.objects.filter(
-            Q(name__icontains=query) | Q(description__icontains=query)
-        )
+            distributors = Distributor.objects.filter(
+                Q(name__icontains=query) | Q(description__icontains=query)
+            )
+            products = Product.objects.filter(
+                Q(name__icontains=query) | Q(description__icontains=query)
+            )
+    
         distributors = DistributorSerializer(distributors, many=True)
         products = ProductSerializer(products, many=True)
         
