@@ -6,12 +6,13 @@ from django.db import models
 - `description` (string) – краткое описание.
 - `image` (string) – URL изображения."""
 
-# Create your models here.
+
 class Distributor(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
     image = models.CharField(max_length=255)
-
+    logo = models.CharField(max_length=255, null=True, blank=True) # rename to logo_url
+    rating = models.FloatField(default=0)
 
 class Product(models.Model):
     name = models.CharField(max_length=100)

@@ -41,3 +41,8 @@ class SearchAPIView(APIView):
 class PromotionsListAPIView(ListAPIView):
     queryset = Promotion.objects.all()
     serializer_class = PromotionSerializer
+
+
+class RecommendedDistributorsListApiView(ListAPIView):
+    queryset = Distributor.objects.all().order_by('rating').values()
+    serializer_class = DistributorSerializer
