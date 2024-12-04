@@ -1,11 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from django.db.models import Q
 
-from .serializers import CategorySerializer, DistributorSerializer, ProductSerializer, PromotionSerializer
+from .serializers import CategorySerializer, DistributorSerializer, ProductSerializer, PromotionSerializer, SupplierSerializer
 
-from .models import Category, Distributor, Product, Promotion
+from .models import Category, Distributor, Product, Promotion, Supplier
 
 # Create your views here.
 class SearchAPIView(APIView):
@@ -48,12 +49,20 @@ class RecommendedDistributorsListApiView(ListAPIView):
     serializer_class = DistributorSerializer
 
 
-class CategoryAPIView(APIView):
+class CategoryListAPIView(ListAPIView):
+    queryset = Category.objects.filter(parent=None)
+    serializer_class = CategorySerializer
 
-    def get(self, request):
-        categories = Category.objects.filter(parent=None)
 
-        categories = CategorySerializer(categories, many=True)
-        return Response({
-            'categories': categories.data
-        })
+class SupplierBySubcategoryListAPIView(ListAPIView):
+    serializer_class = SupplierSerializer
+
+    def get_queryset(self):
+        subcategory_id = self.kwargs.get('id')
+        try:
+            subcategory = Category.objects.get(id=subcategory_id)
+        except Category.DoesNotExist:
+            return NotFound(f'Subcategory with id {subcategory_id} not found')
+        
+        return Supplier.objects.filter(category=subcategory)
+        # return super().get_queryset()

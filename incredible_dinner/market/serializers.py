@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Category, Distributor, Product, Promotion
+from .models import Category, Distributor, Product, Promotion, Supplier
 
 class DistributorSerializer(ModelSerializer):
     class Meta:
@@ -31,3 +31,9 @@ class CategorySerializer(ModelSerializer):
     class Meta:
         model=Category
         fields=['id', 'name', 'subcategories']
+
+
+class SupplierSerializer(ModelSerializer):
+    class Meta:
+        model=Supplier
+        fields='__all__'

@@ -33,3 +33,10 @@ class Promotion(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=100)
     parent = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='children')
+
+
+class Supplier(models.Model):
+    name = models.CharField(max_length=100)
+    logo = models.CharField(max_length=255, null=True, blank=True) # rename to logo_url
+    rating = models.FloatField(default=0)
+    category = models.ForeignKey(Category, related_name='suppliers', on_delete=models.PROTECT)
