@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Distributor, Product, Promotion
+from .models import Category, Distributor, Product, Promotion
 
 class DistributorSerializer(ModelSerializer):
     class Meta:
@@ -16,4 +16,18 @@ class ProductSerializer(ModelSerializer):
 class PromotionSerializer(ModelSerializer):
     class Meta:
         model=Promotion
-        fields=["__all__"]
+        fields="__all__"
+    
+
+class SubcategorySerializer(ModelSerializer):
+    class Meta:
+        model=Category
+        fields='__all__'
+    
+
+class CategorySerializer(ModelSerializer):
+    subcategories = SubcategorySerializer(many=True, source='children')
+
+    class Meta:
+        model=Category
+        fields=['id', 'name', 'subcategories']

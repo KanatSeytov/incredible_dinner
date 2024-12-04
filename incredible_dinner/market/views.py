@@ -3,9 +3,9 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from django.db.models import Q
 
-from .serializers import DistributorSerializer, ProductSerializer, PromotionSerializer
+from .serializers import CategorySerializer, DistributorSerializer, ProductSerializer, PromotionSerializer
 
-from .models import Distributor, Product, Promotion
+from .models import Category, Distributor, Product, Promotion
 
 # Create your views here.
 class SearchAPIView(APIView):
@@ -46,3 +46,14 @@ class PromotionsListAPIView(ListAPIView):
 class RecommendedDistributorsListApiView(ListAPIView):
     queryset = Distributor.objects.all().order_by('rating').values()
     serializer_class = DistributorSerializer
+
+
+class CategoryAPIView(APIView):
+
+    def get(self, request):
+        categories = Category.objects.filter(parent=None)
+
+        categories = CategorySerializer(categories, many=True)
+        return Response({
+            'categories': categories.data
+        })

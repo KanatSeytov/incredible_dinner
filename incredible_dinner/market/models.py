@@ -10,14 +10,14 @@ from django.db import models
 class Distributor(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
-    image = models.CharField(max_length=255)
+    image = models.CharField(max_length=255, blank=True)
     logo = models.CharField(max_length=255, null=True, blank=True) # rename to logo_url
     rating = models.FloatField(default=0)
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
-    image = models.CharField(max_length=255)
+    image = models.CharField(max_length=255, blank=True)
 
 
 """- `id` (integer) – ID акции.
@@ -26,6 +26,10 @@ class Product(models.Model):
 - `link` (string) – ссылка на акцию."""
 class Promotion(models.Model):
     title = models.CharField(max_length=100)
-    image = models.CharField(max_length=255) # rename to image_url
-    link = models.CharField(max_length=255)
+    image = models.CharField(max_length=255, blank=True) # rename to image_url
+    link = models.CharField(max_length=255, blank=True)
 
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    parent = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='children')
