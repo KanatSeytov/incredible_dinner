@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 """- `type` (string) – тип результата (`product` или `distributor`).
 - `id` (integer) – ID элемента.
 - `name` (string) – название.
@@ -56,3 +56,12 @@ class ProductPrice(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='products')
     price = models.FloatField()
     delivery_time = models.CharField(max_length=100)
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together= ('user', 'product')
