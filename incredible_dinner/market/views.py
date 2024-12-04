@@ -11,7 +11,7 @@ from .serializers import CategorySerializer, DistributorSerializer, FavoriteSeri
 from .models import Category, Distributor, Favorite, Product, Promotion, Supplier
 
 # Create your views here.
-class SearchAPIView(APIView):
+class SearchView(APIView):
 
     def get(self, request):
         query = request.query_params.get('query')
@@ -41,22 +41,22 @@ class SearchAPIView(APIView):
                 'result': result
             })
 
-class PromotionsListAPIView(ListAPIView):
+class PromotionsView(ListAPIView):
     queryset = Promotion.objects.all()
     serializer_class = PromotionSerializer
 
 
-class RecommendedDistributorsListApiView(ListAPIView):
+class RecommendedDistributorsView(ListAPIView):
     queryset = Distributor.objects.all().order_by('rating').values()
     serializer_class = DistributorSerializer
 
 
-class CategoryListAPIView(ListAPIView):
+class CategoryView(ListAPIView):
     queryset = Category.objects.filter(parent=None)
     serializer_class = CategorySerializer
 
 
-class SupplierBySubcategoryListAPIView(ListAPIView):
+class SupplierBySubcategoryView(ListAPIView):
     serializer_class = SupplierSerializer
 
     def get_queryset(self):
@@ -69,7 +69,7 @@ class SupplierBySubcategoryListAPIView(ListAPIView):
         return Supplier.objects.filter(category=subcategory)
         # return super().get_queryset()
     
-class SupplierProductsListAPIView(ListAPIView):
+class SupplierProductsView(ListAPIView):
     serializer_class = ProductSerializer
 
     def get_queryset(self):
@@ -87,7 +87,7 @@ class SupplierProductsListAPIView(ListAPIView):
             )
         return products
     
-class AddToFavoritesCreateAPIView(CreateAPIView):
+class AddToFavoritesView(CreateAPIView):
     serializer_class = FavoriteSerializer
 
     def create(self, request, *args, **kwargs):

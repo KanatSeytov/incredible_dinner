@@ -1,14 +1,15 @@
 
 from django.urls import path
 
-from .views import AddToFavoritesCreateAPIView, CategoryListAPIView, PromotionsListAPIView, RecommendedDistributorsListApiView, SearchAPIView, SupplierBySubcategoryListAPIView, SupplierProductsListAPIView
+from .views import AddToFavoritesView, CategoryView, PromotionsView, RecommendedDistributorsView, SearchView, SupplierBySubcategoryView, SupplierProductsView
 
 urlpatterns = [
-    path('search/', SearchAPIView.as_view()),
-    path('carousel/promotions/', PromotionsListAPIView.as_view()),
-    path('carousel/recommended-distributors/', RecommendedDistributorsListApiView.as_view()),
-    path('categories/', CategoryListAPIView.as_view()),
-    path('subcategory/<int:id>/suppliers/', SupplierBySubcategoryListAPIView.as_view(), name='suppliers-by-category'),
-    path('supplier/<int:id>/products/', SupplierProductsListAPIView.as_view(), name='supplier-products'),
-    path('favorites/', AddToFavoritesCreateAPIView.as_view(), name='add-to-favorites')
+    path('search/', SearchView.as_view()),
+    path('carousel/promotions/', PromotionsView.as_view()),
+    path('carousel/recommended-distributors/', RecommendedDistributorsView.as_view()),
+    path('categories/', CategoryView.as_view()),
+    path('subcategory/<int:id>/suppliers/', SupplierBySubcategoryView.as_view(), name='suppliers-by-category'),
+    path('supplier/<int:id>/products/', SupplierProductsView.as_view(), name='supplier-products'),
+    path('favorites/', AddToFavoritesView.as_view(), name='add-to-favorites'),
+    # path('cart/', AddToCartView.as_view(), name='add-to-favorites'),
 ]
