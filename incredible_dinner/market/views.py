@@ -6,9 +6,9 @@ from rest_framework.exceptions import NotFound
 from rest_framework.serializers import ValidationError
 from django.db.models import Q
 
-from .serializers import CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductSerializer, PromotionSerializer, SupplierSerializer
+from .serializers import CartItemSerializer, CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductSerializer, PromotionSerializer, SupplierSerializer
 
-from .models import Category, Distributor, Favorite, Product, Promotion, Supplier
+from .models import CartItem, Category, Distributor, Favorite, Product, Promotion, Supplier
 
 # Create your views here.
 class SearchView(APIView):
@@ -102,27 +102,15 @@ class AddToFavoritesView(CreateAPIView):
         })
 
 
-# class AddToCartView(CreateAPIView):
-#     serializer_class = CartItem
+class AddToCartView(CreateAPIView):
+    serializer_class = CartItemSerializer
     
-#     # def create(self, request, *args, **kwargs):
-#     #     try:
-#     #         serializer = self.get_serializer(data=request.data)
-#     #         serializer.is_valid(raise_exception=True)
-#     #         self.perform_create(serializer)
-#     #         headers = self.get_success_headers(serializer.data)
-#     #         return Response({'status': '201'}, status=status.HTTP_201_CREATED, headers=headers)
-#     #     except ValidationError as e:
-#     #         return Response({
-#     #             'status': str(e.detail)
-#     #         }, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        return super().perform_create(serializer)
     
-#     def perform_create(self, serializer):
-#         serializer.save(user=self.request.user)
-#         return super().perform_create(serializer)
-    
-#     def post(self, request, *args, **kwargs):
-#         response = super().post(request, *args, **kwargs)
-#         return Response({
-#             'status': response.status_code
-#         })
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        return Response({
+            'status': response.status_code
+        })

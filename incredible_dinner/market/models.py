@@ -65,3 +65,14 @@ class Favorite(models.Model):
 
     class Meta:
         unique_together= ('user', 'product')
+
+
+class CartItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='cart_items')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    quantity = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        unique_together = ('user', 'product')
