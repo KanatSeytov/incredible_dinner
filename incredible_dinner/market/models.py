@@ -14,10 +14,19 @@ class Distributor(models.Model):
     logo = models.CharField(max_length=255, null=True, blank=True) # rename to logo_url
     rating = models.FloatField(default=0)
 
+"""- `id` (integer) – ID товара.
+- `sku` (string) – артикул.
+- `name` (string) – название.
+- `city` (string) – город.
+- `image` (string) – URL изображения.
+- `delivery_time` (string) – срок доставки."""
 class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
     image = models.CharField(max_length=255, blank=True)
+    sku = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=100, default='Astana')
+    delivery_time = models.CharField(max_length=100, default='Завтра')
 
 
 """- `id` (integer) – ID акции.
@@ -40,3 +49,10 @@ class Supplier(models.Model):
     logo = models.CharField(max_length=255, null=True, blank=True) # rename to logo_url
     rating = models.FloatField(default=0)
     category = models.ForeignKey(Category, related_name='suppliers', on_delete=models.PROTECT)
+
+
+class ProductPrice(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='suppliers')
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='products')
+    price = models.FloatField()
+    delivery_time = models.CharField(max_length=100)

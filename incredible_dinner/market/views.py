@@ -66,3 +66,21 @@ class SupplierBySubcategoryListAPIView(ListAPIView):
         
         return Supplier.objects.filter(category=subcategory)
         # return super().get_queryset()
+    
+class SupplierProductsListAPIView(ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        supplier_id = self.kwargs.get('id')
+        search_query = self.request.query_params.get('search', '')
+        supplier_exists = Supplier.objects.filter(id=supplier_id).exists()
+        if not supplier_exists:
+            raise NotFound(f'Supplier with id {supplier_id} not found')
+        
+        products = Product.objects.filter(suppliers__supplier_id=supplier_id)
+
+        if search_query:
+            products = products.filter(
+                Q(name__icontains=search_query) | Q(sku__icontains=search_query)
+            )
+        return products
