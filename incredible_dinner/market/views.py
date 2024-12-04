@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from django.db.models import Q
 
-from .serializers import DistributorSerializer, ProductSerializer
+from .serializers import DistributorSerializer, ProductSerializer, PromotionSerializer
 
-from .models import Distributor, Product
+from .models import Distributor, Product, Promotion
 
 # Create your views here.
 class SearchAPIView(APIView):
@@ -36,3 +37,7 @@ class SearchAPIView(APIView):
         return Response({
                 "result": result
             })
+
+class PromotionsListAPIView(ListAPIView):
+    queryset = Promotion.objects.all()
+    serializer_class = PromotionSerializer
