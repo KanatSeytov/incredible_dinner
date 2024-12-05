@@ -5,13 +5,13 @@ from .models import CartItem, Category, Distributor, Favorite, Product, Promotio
 class DistributorSerializer(ModelSerializer):
     class Meta:
         model=Distributor
-        fields="__all__"
+        fields=['id', 'name', 'description', 'image']
     
 
 class ProductSerializer(ModelSerializer):
     class Meta:
         model=Product
-        fields="__all__"
+        fields=['id', 'name', 'description', 'image'] 
 
 class PromotionSerializer(ModelSerializer):
     class Meta:
