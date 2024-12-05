@@ -1,6 +1,6 @@
-from rest_framework.serializers import ModelSerializer, ValidationError, IntegerField
+from rest_framework.serializers import ModelSerializer, ValidationError, IntegerField, SerializerMethodField
 
-from .models import CartItem, Category, Distributor, Favorite, Product, Promotion, Supplier
+from .models import CartItem, Category, Distributor, Favorite, Product, ProductPrice, Promotion, Supplier
 
 class DistributorSerializer(ModelSerializer):
     class Meta:
@@ -85,3 +85,34 @@ class CartItemSerializer(ModelSerializer):
             cart_item.quantity = quantity
             cart_item.save()
         return cart_item
+
+
+class ProductDetailSerializer(ModelSerializer):
+    price = SerializerMethodField()
+    characteristics = SerializerMethodField()
+    suppliers = SerializerMethodField()
+
+    class Meta:
+        model=Product
+        fields='__all__'
+
+    def get_price(self, obj):
+        return {
+            'retail': obj.price_retail,
+            'wholesale': obj.price_wholesale
+        }
+    
+    def get_characteristics(self, obj):
+        return [{'name': key, 'value': value} for key, value in obj.characteristics.items()]
+    
+    def get_suppliers(self, obj):
+        supplier_prices = ProductPrice.objects.filter(product=obj)
+        return [
+            {
+                'id': sp.supplier.id,
+                'name': sp.supplier.name, 
+                'price': sp.price,
+                'delivery_time': sp.delivery_time
+            }
+            for sp in supplier_prices
+        ]

@@ -30,7 +30,7 @@ class Product(models.Model):
     price_retail = models.DecimalField(max_digits=10, decimal_places=2)
     price_wholesale = models.DecimalField(max_digits=10, decimal_places=2)
     min_order = models.PositiveIntegerField()
-    characteristics = models.JSONField(blank=True)
+    characteristics = models.JSONField()
 
 """- `id` (integer) – ID акции.
 - `title` (string) – название акции.
@@ -79,10 +79,3 @@ class CartItem(models.Model):
 
     class Meta:
         unique_together = ('user', 'product')
-
-
-# class SupplierPrice(models.Model):
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='suppliers')
-#     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='products')
-#     price = models.FloatField()
-#     delivery_time = models.CharField(max_length=100)

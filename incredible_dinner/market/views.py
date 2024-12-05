@@ -1,12 +1,12 @@
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.serializers import ValidationError
 from django.db.models import Q
 
-from .serializers import CartItemSerializer, CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductSerializer, PromotionSerializer, SupplierSerializer
+from .serializers import CartItemSerializer, CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductDetailSerializer, ProductSerializer, PromotionSerializer, SupplierSerializer
 
 from .models import CartItem, Category, Distributor, Favorite, Product, Promotion, Supplier
 
@@ -29,7 +29,7 @@ class SearchView(APIView):
     
         distributors = DistributorSerializer(distributors, many=True)
         products = ProductSerializer(products, many=True)
-        
+            
         for item in distributors.data:
             item['type'] = 'distributor'
 
@@ -114,3 +114,14 @@ class AddToCartView(CreateAPIView):
         return Response({
             'status': response.status_code
         })
+
+
+class ProductDetailView(RetrieveAPIView):
+    serializer_class = ProductDetailSerializer
+
+    def get_object(self):
+        product_id = self.kwargs.get('id')
+        try:
+            return Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise NotFound(f'Product with id {product_id} does not exists')
