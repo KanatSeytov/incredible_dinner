@@ -1,6 +1,6 @@
 
 ## Requirements
-- python3.10
+- python3.11
 
 ## Installation and Setup
 
