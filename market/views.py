@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from rest_framework.serializers import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 
 from .serializers import CartItemSerializer, CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductDetailSerializer, ProductSerializer, PromotionSerializer, SupplierSerializer
@@ -11,7 +11,7 @@ from .serializers import CartItemSerializer, CategorySerializer, DistributorSeri
 from .models import CartItem, Category, Distributor, Favorite, Product, Promotion, Supplier
 
 # Create your views here.
-class SearchView(APIView):
+class SearchAPIView(APIView):
 
     def get(self, request):
         query = request.query_params.get('query')
@@ -41,22 +41,22 @@ class SearchView(APIView):
                 'result': result
             })
 
-class PromotionsView(ListAPIView):
+class PromotionsListView(ListAPIView):
     queryset = Promotion.objects.all()
     serializer_class = PromotionSerializer
 
 
-class RecommendedDistributorsView(ListAPIView):
+class RecommendedDistributorsListView(ListAPIView):
     queryset = Distributor.objects.all().order_by('rating').values()
     serializer_class = DistributorSerializer
 
 
-class CategoryView(ListAPIView):
+class CategoryListView(ListAPIView):
     queryset = Category.objects.filter(parent=None)
     serializer_class = CategorySerializer
 
 
-class SupplierBySubcategoryView(ListAPIView):
+class SupplierBySubcategoryListView(ListAPIView):
     serializer_class = SupplierSerializer
 
     def get_queryset(self):
@@ -69,7 +69,7 @@ class SupplierBySubcategoryView(ListAPIView):
         return Supplier.objects.filter(category=subcategory)
         # return super().get_queryset()
     
-class SupplierProductsView(ListAPIView):
+class SupplierProductsListView(ListAPIView):
     serializer_class = ProductSerializer
 
     def get_queryset(self):
@@ -87,9 +87,10 @@ class SupplierProductsView(ListAPIView):
             )
         return products
     
-class AddToFavoritesView(CreateAPIView):
+class AddToFavoritesCreateView(CreateAPIView):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
+    permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -102,8 +103,9 @@ class AddToFavoritesView(CreateAPIView):
         })
 
 
-class AddToCartView(CreateAPIView):
+class AddToCartCreateView(CreateAPIView):
     serializer_class = CartItemSerializer
+    permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -116,7 +118,7 @@ class AddToCartView(CreateAPIView):
         })
 
 
-class ProductDetailView(RetrieveAPIView):
+class ProductDetailRetrieveView(RetrieveAPIView):
     serializer_class = ProductDetailSerializer
 
     def get_object(self):
