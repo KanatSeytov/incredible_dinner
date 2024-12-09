@@ -1,12 +1,12 @@
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, ListCreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, MethodNotAllowed
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q, F
 
-from .serializers import CartItemSerializer, CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductDetailSerializer, ProductSerializer, PromotionSerializer, SupplierProductsSerializer, SupplierSerializer
+from .serializers import AddToCartSerializer, CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductDetailSerializer, ProductSerializer, PromotionSerializer, SupplierProductsSerializer, SupplierSerializer, UpdateCartSerializer
 
 from .models import CartItem, Category, Distributor, Favorite, Product, ProductPrice, Promotion, Supplier
 
@@ -121,7 +121,7 @@ class CartListCreateView(ListCreateAPIView):
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return CartItemSerializer
+            return AddToCartSerializer
         return SupplierProductsSerializer
 
     def get_queryset(self):
@@ -172,3 +172,48 @@ class CartListCreateView(ListCreateAPIView):
             'status': status.HTTP_400_BAD_REQUEST,
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CartProductDetailView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    # queryset = CartItem.objects.all()
+    serializer_class = UpdateCartSerializer
+    lookup_field = 'product_id'
+    http_method_names = ['patch', 'delete']
+        
+    def get_object(self):
+        # Custom logic to fetch the cart item
+        try:
+            product_id = self.kwargs['product_id']
+            product = Product.objects.get(id=product_id)
+            item = CartItem.objects.filter(user=self.request.user, product=product).first()
+            if item:
+                return item
+            return None
+        except CartItem.DoesNotExist:
+            raise Response(
+                {"detail": "Product not found in cart."}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            raise Response(
+                {'detail': str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def delete(self, request, product_id, *args, **kwargs):
+        # Delete the cart item based on product_id and user from the request
+        cart_item = self.get_object()
+        cart_item.delete()
+        return Response(
+            {"detail": "Product successfully removed from cart."}, 
+            status=status.HTTP_204_NO_CONTENT
+        )
+    
+    def patch(self, request, product_id, *args, **kwargs):
+        # Get the cart item using product_id and user from the request
+        cart_item = self.get_object()
+        serializer = self.get_serializer(cart_item, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

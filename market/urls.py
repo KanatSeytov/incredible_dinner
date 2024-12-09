@@ -1,7 +1,7 @@
 
 from django.urls import path
 
-from .views import (CartListCreateView, SearchAPIView, PromotionsListView, 
+from .views import (CartListCreateView, CartProductDetailView, SearchAPIView, PromotionsListView, 
                     RecommendedDistributorsListView, CategoryListView, 
                     SupplierBySubcategoryListView, SupplierProductsListView, 
                     AddToFavoritesCreateView, 
@@ -17,5 +17,5 @@ urlpatterns = [
     path('favorites/', AddToFavoritesCreateView.as_view(), name='add-to-favorites'),
     path('product/<int:id>/', ProductDetailRetrieveView.as_view(), name='add-to-favorites'),
     path('cart/', CartListCreateView.as_view()),
-    # path('cart/', AddToCartCreateView.as_view(), name='add-to-favorites'),
+    path('cart/product/<int:product_id>/', CartProductDetailView.as_view()),
 ]

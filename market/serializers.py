@@ -61,14 +61,20 @@ class FavoriteSerializer(ModelSerializer):
         return favorite
 
 
-class CartItemSerializer(ModelSerializer):
+class UpdateCartSerializer(ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['quantity']
+
+
+class AddToCartSerializer(ModelSerializer):
     product_id = IntegerField(write_only=True)
     quantity = IntegerField(write_only=True, min_value=1)
 
     class Meta:
         model=CartItem
         fields=['product_id', 'quantity']
-    
+        
 
     def validate_product_id(self, value):
         if not Product.objects.filter(id=value).exists():
