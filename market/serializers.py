@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, ValidationError, IntegerField, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, ValidationError, IntegerField, SerializerMethodField, CharField, DecimalField, FloatField, Serializer
 
 from .models import CartItem, Category, Distributor, Favorite, Product, ProductPrice, Promotion, Supplier
 
@@ -116,3 +116,16 @@ class ProductDetailSerializer(ModelSerializer):
             }
             for sp in supplier_prices
         ]
+    
+class CartProductSerializer(Serializer):
+    id = IntegerField()
+    name = CharField(max_length=100)
+    price = DecimalField(max_digits=10, decimal_places=2)
+    image = CharField(max_length=255)
+    quantity = IntegerField()
+
+
+class SupplierProductsSerializer(Serializer):
+    id = IntegerField()
+    name = CharField()
+    products = CartProductSerializer(many=True)

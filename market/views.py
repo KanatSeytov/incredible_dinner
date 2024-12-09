@@ -1,14 +1,14 @@
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q
+from django.db.models import Q, F
 
-from .serializers import CartItemSerializer, CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductDetailSerializer, ProductSerializer, PromotionSerializer, SupplierSerializer
+from .serializers import CartItemSerializer, CategorySerializer, DistributorSerializer, FavoriteSerializer, ProductDetailSerializer, ProductSerializer, PromotionSerializer, SupplierProductsSerializer, SupplierSerializer
 
-from .models import CartItem, Category, Distributor, Favorite, Product, Promotion, Supplier
+from .models import CartItem, Category, Distributor, Favorite, Product, ProductPrice, Promotion, Supplier
 
 # Create your views here.
 class SearchAPIView(APIView):
@@ -41,6 +41,7 @@ class SearchAPIView(APIView):
                 'result': result
             })
 
+
 class PromotionsListView(ListAPIView):
     queryset = Promotion.objects.all()
     serializer_class = PromotionSerializer
@@ -67,8 +68,8 @@ class SupplierBySubcategoryListView(ListAPIView):
             return NotFound(f'Subcategory with id {subcategory_id} does not exists')
         
         return Supplier.objects.filter(category=subcategory)
-        # return super().get_queryset()
-    
+
+
 class SupplierProductsListView(ListAPIView):
     serializer_class = ProductSerializer
 
@@ -86,25 +87,11 @@ class SupplierProductsListView(ListAPIView):
                 Q(name__icontains=search_query) | Q(sku__icontains=search_query)
             )
         return products
-    
+
+
 class AddToFavoritesCreateView(CreateAPIView):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-        return super().perform_create(serializer)
-    
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        return Response({
-            'status': response.status_code
-        })
-
-
-class AddToCartCreateView(CreateAPIView):
-    serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
@@ -127,3 +114,61 @@ class ProductDetailRetrieveView(RetrieveAPIView):
             return Product.objects.get(id=product_id)
         except Product.DoesNotExist:
             raise NotFound(f'Product with id {product_id} does not exists')
+        
+
+class CartListCreateView(ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CartItemSerializer
+        return SupplierProductsSerializer
+
+    def get_queryset(self):
+        queryset = ProductPrice.objects.filter(
+            product__in=CartItem.objects.filter(user=self.request.user).values('product')
+        ).annotate(
+            quantity=F('product__products__quantity')
+        ).values(
+            'supplier__id',
+            'supplier__name',
+            'product__id',
+            'product__name',
+            'price',
+            'product__image',
+            'quantity'
+        )
+
+        grouped_data = {}
+        for item in queryset:
+            supplier_name = item['supplier__name']
+            product_data = {
+                "id": item['product__id'],
+                "name": item['product__name'],
+                "price": item['price'],
+                "quantity": item['quantity'],
+                "image": item['product__image']
+            }
+
+            if supplier_name not in grouped_data:
+                grouped_data[supplier_name] = {
+                    "id": item['supplier__id'],
+                    "name": supplier_name,
+                    "products": []
+                }
+            grouped_data[supplier_name]["products"].append(product_data)
+        return list(grouped_data.values())
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response({
+                'status': status.HTTP_201_CREATED,
+                'message': 'Item added to cart successfully'
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response({
+            'status': status.HTTP_400_BAD_REQUEST,
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
